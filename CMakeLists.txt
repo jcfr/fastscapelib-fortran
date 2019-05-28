@@ -140,6 +140,7 @@ if(BUILD_PYTHON_MODULE)
   add_custom_command(
     OUTPUT ${F2PY_MODULE_FILE}
     COMMAND ${F2PY_EXECUTABLE}
+      --f90exec=${CMAKE_Fortran_COMPILER}
       -m ${F2PY_MODULE_NAME}
       -c
       ${FASTSCAPELIB_SRC_FILES}
