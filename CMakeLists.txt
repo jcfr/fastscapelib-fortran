@@ -31,7 +31,7 @@ set(FLEXURE_SRC_FILES
 # Flags
 # =====
 
-if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+if(CMAKE_Fortran_COMPILER_ID MATCHES "Flang|GNU")
     set(dialect "-ffree-form -std=f2008 -fimplicit-none")
     set(bounds "-fbounds-check")
     set(warnings "-Wall -Wno-unused-dummy-argument")
@@ -125,29 +125,17 @@ if(BUILD_PYTHON_MODULE)
       ${CMAKE_MODULE_PATH})
   endif()
 
-  find_package(PythonExtensions)
+  find_package(NumPy REQUIRED)
+  find_package(PythonExtensions REQUIRED)
   find_package(F2PY REQUIRED)
 
   set(F2PY_MODULE_NAME "_fastscapelib_fortran")
-  set(F2PY_MODULE_FILE
-    ${CMAKE_CURRENT_BINARY_DIR}/${F2PY_MODULE_NAME}${PYTHON_EXTENSION_MODULE_SUFFIX}
-    )
-
-  add_custom_target(${F2PY_MODULE_NAME} ALL
-    DEPENDS ${F2PY_MODULE_FILE}
-    )
-
-  add_custom_command(
-    OUTPUT ${F2PY_MODULE_FILE}
-    COMMAND ${F2PY_EXECUTABLE}
-      --f90exec=${CMAKE_Fortran_COMPILER}
-      -m ${F2PY_MODULE_NAME}
-      -c
-      ${FASTSCAPELIB_SRC_FILES}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  add_python_extension(${F2PY_MODULE_NAME}
+    SOURCES ${FASTSCAPELIB_SRC_FILES}
+    INCLUDE_DIRECTORIES ${FASTSCAPELIB_SRC_DIR}
     )
 
   if(SKBUILD)
-    install(FILES ${F2PY_MODULE_FILE} DESTINATION ${FASTSCAPELIB_NAME})
+    install(TARGETS ${F2PY_MODULE_NAME} LIBRARY DESTINATION ${FASTSCAPELIB_NAME})
   endif()
 endif()
